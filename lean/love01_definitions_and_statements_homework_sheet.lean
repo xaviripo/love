@@ -19,8 +19,10 @@ namespace LoVe
 1.1 (1 point). Define the function `fib` that computes the Fibonacci
 numbers. -/
 
-def fib : ℕ → ℕ :=
-sorry
+def fib : ℕ → ℕ
+| 0 := 0
+| 1 := 1
+| (nat.succ (nat.succ n)) := (fib n) + (fib (nat.succ n))
 
 /-! 1.2 (0 points). Check that your function works as expected. -/
 
@@ -75,6 +77,13 @@ Hint: Take a look at `reverse_reverse` from the demonstration file. -/
 #check sorry_lemmas.reverse_reverse
 
 -- enter your lemma statements here
+lemma append_assoc {α : Type} (xs ys zs : list α) :
+  append₂ (append₂ xs ys) zs = append₂ xs (append₂ ys zs) :=
+sorry
+
+lemma append_reverse {α : Type} (xs ys : list α) :
+  reverse (append₂ xs ys) = append₂ (reverse ys) (reverse xs) :=
+sorry
 
 
 /-! ## Question 3 (5 points): λ-Terms
@@ -91,16 +100,16 @@ while constructing a term. By hovering over `_`, you will see the current
 logical context. -/
 
 def B : (α → β) → (γ → α) → γ → β :=
-sorry
+λf g c, f (g c)
 
 def S : (α → β → γ) → (α → β) → α → γ :=
-sorry
+λf g a, f a (g a)
 
 def more_nonsense : (γ → (α → β) → α) → γ → β → α :=
-sorry
+λf c b, f c (λ_, b)
 
 def even_more_nonsense : (α → α → β) → (β → γ) → α → β → γ :=
-sorry
+λf g a b, g b
 
 /-! 3.2 (1 point). Complete the following definition.
 
@@ -109,8 +118,8 @@ follow the procedure described in the Hitchhiker's Guide.
 
 Note: Peirce is pronounced like the English word "purse". -/
 
-def weak_peirce : ((((α → β) → α) → α) → β) → β :=
-sorry
+def weak_peirgce : ((((α → β) → α) → α) → β) → β :=
+λf, f (λg, g (λa, f (λh, a)))
 
 /-! 3.3 (2 points). Show the typing derivation for your definition of `S` above,
 using ASCII or Unicode art. You might find the characters `–` (to draw
@@ -119,5 +128,22 @@ horizontal bars) and `⊢` useful.
 Feel free to introduce abbreviations to avoid repeating large contexts `C`. -/
 
 -- write your solution here
+
+/-
+
+    ———————————————————————————————————————————————— Var    ————————————————————————————————————————— Var     ———————————————————————————————————————————— Var    ———————————————————————————————————————— Var
+    f : α → β → γ, g : α → β, a : α ⊢ f : α → β → γ         f : α → β → γ, g : α → β, a : α ⊢ a : α          f : α → β → γ, g : α → β, a : α ⊢ g : α → β         f : α → β → γ, g : α → β, a : α ⊢ a : α
+    ————————————————————————————————————————————————————————————————————————————————————————————————— App    ————————————————————————————————————————————————————————————————————————————————————————————— App
+    f : α → β → γ, g : α → β, a : α ⊢ f a : β → γ                                                            f : α → β → γ, g : α → β, a : α ⊢ g a : β
+    ———————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————— App
+    f : α → β → γ, g : α → β, a : α ⊢ f a (g a) : γ
+    ————————————————————————————————————————————————————————— Lam
+    f : α → β → γ, g : α → β ⊢ (λ a : α, f a (g a)) : α → γ
+    ———————————————————————————————————————————————————————————————————— Lam
+    f : α → β → γ ⊢ (λ g : α → β, λ a : α, f a (g a)) : (α → β) → α → γ
+    ————————————————————————————————————————————————————————————————————————————————————— Lam
+    ⊢ (λ f : α → β → γ, λ g : α → β, λ a : α, f a (g a)) : (α → β → γ) → (α → β) → α → γ
+
+-/
 
 end LoVe
