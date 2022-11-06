@@ -21,8 +21,10 @@ be negative are represented by 0. For example:
     `sub 7 2 = 5`
     `sub 2 7 = 0` -/
 
-def sub : ℕ → ℕ → ℕ :=
-sorry
+def sub : ℕ → ℕ → ℕ
+| m 0 := m
+| 0 n := 0
+| (nat.succ m) (nat.succ n) := sub m n
 
 /-! 1.2. Check that your function works as expected. -/
 
@@ -69,6 +71,11 @@ def some_env : string → ℤ
 #eval eval some_env (aexp.var "x")   -- expected: 3
 -- invoke `#eval` here
 
+#eval eval some_env (aexp.add (aexp.var "x") (aexp.var "y")) -- expected: 20
+#eval eval some_env (aexp.sub (aexp.var "y") (aexp.var "x")) -- expected: 14
+#eval eval some_env (aexp.mul (aexp.var "x") (aexp.var "y")) -- expected: 51
+#eval eval some_env (aexp.div (aexp.var "y") (aexp.var "x")) -- expected: 5
+
 /-! 2.2. The following function simplifies arithmetic expressions involving
 addition. It simplifies `0 + e` and `e + 0` to `e`. Complete the definition so
 that it also simplifies expressions involving the other three binary
@@ -96,7 +103,7 @@ the property that the value of `e` after simplification is the same as the
 value of `e` before. -/
 
 lemma simplify_correct (env : string → ℤ) (e : aexp) :
-  true :=   -- replace `true` by your lemma statement
+  eval env (simplify e) = eval env e :=  -- replace `true` by your lemma statement
 sorry
 
 
@@ -117,23 +124,40 @@ def K : α → β → α :=
 λa b, a
 
 def C : (α → β → γ) → β → α → γ :=
-sorry
+λf, λb a, f a b
 
 def proj_1st : α → α → α :=
-sorry
+λa1 a2, a1
 
 /-! Please give a different answer than for `proj_1st`. -/
 
 def proj_2nd : α → α → α :=
-sorry
+λa1 a2, a2
 
 def some_nonsense : (α → β → γ) → α → (α → γ) → β → γ :=
-sorry
+λf, λa, λg, λb, g a
 
 /-! 3.2. Show the typing derivation for your definition of `C` above, on paper
 or using ASCII or Unicode art. You might find the characters `–` (to draw
 horizontal bars) and `⊢` useful. -/
 
 -- write your solution in a comment here or on paper
+
+/-
+
+    ———————————————————————————------------------------ Cst  ———————————————————————————--------------------- Cst
+    f : α → β → γ, a : α, g : α → γ, b : β ⊢ g : α → γ       f : α → β → γ, a : α, g : α → γ, b : β ⊢ a : α
+    ————————————————————————————————————————————————————————————————————————————————————————————————————————- App
+    f : α → β → γ, a : α, g : α → γ, b : β ⊢ g a : γ
+    ————————————————————————————————————————————————---------- Lam
+    f : α → β → γ, a : α, g : α → γ, ⊢ (λ b : β, g a) : β → γ
+    ————————————————————————————————————————————————--------------------- Lam
+    f : α → β → γ, a : α ⊢ (λ g : α → γ, λ b : β, g a) : (α → γ) → β → γ
+    ————————————————————————————————————————————————--------------------------- Lam
+    f : α → β → γ ⊢ (λ a : α, λ g : α → γ, λ b : β, g a) : α → (α → γ) → β → γ
+    ————————————————————————————————————————————————-------------------------------------------- Lam
+    ⊢ (λ f : α → β → γ, λ a : α, λ g : α → γ, λ b : β, g a) : (α → β → γ) → α → (α → γ) → β → γ
+
+-/
 
 end LoVe
