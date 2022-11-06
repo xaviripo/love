@@ -1,0 +1,8 @@
+# Built object files
+# See: https://leanprover-community.github.io/leanproject.html#building-a-project
+*.olean
+
+# Created by `leanpkg configure`
+# See: https://leanprover.github.io/reference/using_lean.html#directory-layout
+leanpkg.path
+_target/deps
