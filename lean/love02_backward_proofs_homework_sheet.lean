@@ -24,25 +24,55 @@ Section 2.3 in the Hitchhiker's Guide. -/
 
 lemma B (a b c : Prop) :
   (a → b) → (c → a) → c → b :=
-sorry
+begin
+  intros hab hca hc,
+  apply hab,
+  apply hca,
+  exact hc
+end
 
 lemma S (a b c : Prop) :
   (a → b → c) → (a → b) → a → c :=
-sorry
+begin
+  intros habc hab ha,
+  apply habc,
+  exact ha,
+  apply hab,
+  exact ha
+end
 
 lemma more_nonsense (a b c : Prop) :
   (c → (a → b) → a) → c → b → a :=
-sorry
+begin
+  intros hcaba hc hb,
+  apply hcaba,
+  { exact hc },
+  { intro ha,
+    exact hb }
+end
 
 lemma even_more_nonsense (a b c : Prop) :
   (a → a → b) → (b → c) → a → b → c :=
-sorry
+begin
+  intros _ hbc _ hb,
+  apply hbc,
+  exact hb
+end
 
 /-! 1.2 (1 point). Prove the following lemma using basic tactics. -/
 
 lemma weak_peirce (a b : Prop) :
   ((((a → b) → a) → a) → b) → b :=
-sorry
+begin
+  intro hp,
+  apply hp,
+  intro hq,
+  apply hq,
+  intro ha,
+  apply hp,
+  intro hr,
+  exact ha
+end
 
 
 /-! ## Question 2 (5 points): Logical Connectives
@@ -60,7 +90,16 @@ Hints:
 
 lemma about_implication (a b : Prop) :
   ¬ a ∨ b → a → b :=
-sorry
+begin
+  intros hp ha,
+  apply or.elim hp,
+  { intro hna,
+    apply false.elim,
+    apply hna,
+    exact ha },
+  { intro hb,
+    exact hb }
+end
 
 /-! 2.2 (2 points). Prove the missing link in our chain of classical axiom
 implications.
@@ -79,7 +118,24 @@ Hints:
 
 lemma em_of_dn :
   double_negation → excluded_middle :=
-sorry
+begin
+  rw double_negation,
+  rw excluded_middle,
+  intros hdn a,
+  apply hdn,
+  clear hdn,
+  -- We just need to prove ¬¬(a ∨ ¬a), which is true intuitionistically
+  rw not_def,
+  rw not_def,
+  intro hnem,
+  apply hnem,
+  apply or.intro_right,
+  rw not_def,
+  intro ha,
+  apply hnem,
+  apply or.intro_left,
+  exact ha
+end
 
 /-! 2.3 (2 points). We have proved three of the six possible implications
 between `excluded_middle`, `peirce`, and `double_negation`. State and prove the
@@ -90,6 +146,33 @@ three missing implications, exploiting the three theorems we already have. -/
 #check em_of_dn
 
 -- enter your solution here
+
+lemma em_of_peirce :
+  peirce → excluded_middle :=
+begin
+  intro p,
+  apply em_of_dn,
+  apply dn_of_peirce,
+  exact p
+end
+
+lemma peirce_of_dn :
+  double_negation → peirce :=
+begin
+  intro d,
+  apply peirce_of_em,
+  apply em_of_dn,
+  exact d
+end
+
+lemma dn_of_en :
+  excluded_middle → double_negation :=
+begin
+  intro e,
+  apply dn_of_peirce,
+  apply peirce_of_em,
+  exact e
+end
 
 end backward_proofs
 
