@@ -70,33 +70,88 @@ namespace partial_hoare
 lemma consequence {P P' Q Q' : state → Prop} {S} (h : {* P *} S {* Q *})
     (hp : ∀s, P' s → P s) (hq : ∀s, Q s → Q' s) :
   {* P' *} S {* Q' *} :=
-sorry
+begin
+  rw partial_hoare at *,
+  intros s t,
+  intro p's,
+  intro sst,
+  apply hq,
+  apply h s t,
+  apply hp,
+  exact p's,
+  exact sst
+end
 
 /-! 1.2 (1 point). Prove the rule for `assign`. -/
 
 lemma assign_intro {P : state → Prop} {x} {a : state → ℕ} :
   {* λs, P (s{x ↦ a s}) *} stmt.assign x a {* P *} :=
-sorry
+begin
+  rw partial_hoare,
+  intros s t,
+  intro ps,
+  intro assign,
+  cases' assign,
+  apply ps
+end
 
 /-! 1.3 (1 point). Prove the rule for `seq`. -/
 
 lemma seq_intro {P Q R S T} (hS : {* P *} S {* Q *}) (hT : {* Q *} T {* R *}) :
   {* P *} stmt.seq S T {* R *} :=
-sorry
+begin
+  rw partial_hoare at *,
+  intros s t,
+  intro ps,
+  intro seq,
+  cases' seq,
+  apply hT t t_1,
+  apply hS s t,
+  exact ps,
+  exact seq,
+  exact seq_1
+end
 
 /-! 1.4 (1 point). Prove the rule for `it`. -/
 
 lemma it_intro {b P Q : state → Prop} {S}
     (htrue : {* λs, P s ∧ b s *} S {* Q *}) (hfalse : ∀s, P s ∧ ¬ b s → Q s) :
   {* P *} stmt.it b S {* Q *} :=
-sorry
+begin
+  rw partial_hoare at *,
+  intros s t,
+  intro ps,
+  intro it,
+  cases' it,
+  apply htrue s t,
+  apply and.intro,
+  exact ps,
+  exact hcond,
+  exact it,
+  apply hfalse t,
+  apply and.intro,
+  exact ps,
+  exact hcond
+end
 
 /-! 1.5 (2 points). Prove the rule for `loop`. Notice the similarity with the
 rule for `while` in the WHILE language. -/
 
 lemma loop_intro {S} (P : state → Prop) (h : {* P *} S {* P *}) :
   {* P *} stmt.loop S {* P *} :=
-sorry
+begin
+  rw partial_hoare at *,
+  intros s t,
+  intro ps,
+  intro loop,
+  induction' loop,
+  apply ih_loop_1 P h,
+  apply ih_loop P h,
+  apply h s t,
+  exact ps,
+  exact loop,
+  repeat { sorry } -- TODO
+end
 
 end partial_hoare
 
@@ -117,8 +172,9 @@ stmt.while (λs, s "n" ≠ 0)
 /-! 2.1 (1 point). Define a recursive function that computes 2 to the power of
 `n`. -/
 
-def two_to_the_nth : ℕ → ℕ :=
-sorry
+def two_to_the_nth : ℕ → ℕ
+| nat.zero     := 1
+| (nat.succ n) := 2 * (two_to_the_nth n)
 
 /-! Remember to test your function. Otherwise, you will have big difficulties
 answering question 2.2 below. -/
@@ -133,6 +189,21 @@ answering question 2.2 below. -/
 
 lemma POWER_OF_TWO_correct (n₀ : ℕ) :
   {* λs, s "n" = n₀ *} POWER_OF_TWO {* λs, s "y" = two_to_the_nth n₀ *} :=
-sorry
+show {* λs, s "n" = n₀ ∧ s "y" = 1 *}
+     stmt.while_inv (λs, 2 ^ (n₀ - s "n") = s "y")
+       (λs, s "n" ≠ 0)
+       (stmt.assign "y" (λs, s "y" * 2) ;;
+        stmt.assign "n" (λs, s "n" - 1))
+     {* λs, s "n" = 0 ∧ s "y" = 2 ^ n₀ *}, from
+  begin
+    vcg; simp { contextual := tt },
+    intros s hny hnz,
+    rw ←hny,
+    cases s "n",
+    { finish },
+    {
+      sorry
+    }
+  end
 
 end LoVe
